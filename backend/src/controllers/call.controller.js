@@ -35,13 +35,9 @@ export const triggerPatientCall = asyncHandler(async (req, res) => {
   // 2. Trigger Twilio Call
   let callResult;
   try {
-    callResult = await makeOutboundCall(patient.phone_number, patient_id);
+     callResult = await makeOutboundCall(patient.phone_number, patient_id);
   } catch (twilioErr) {
-    throw new ApiError(
-      500,
-      "Failed to connect to Twilio to make outbound call",
-      [twilioErr.message],
-    );
+     throw new ApiError(500, "Failed to connect to Twilio to make outbound call", [twilioErr.message]);
   }
 
   // 3. Log initial call state into database
@@ -54,11 +50,9 @@ export const triggerPatientCall = asyncHandler(async (req, res) => {
         started_at: new Date(),
       },
     });
-
+    
     // Invalidate the calls cache
-    if (redis) {
-      await redis.del("calls:all");
-    }
+    await redis.del("calls:all");
   } catch (dbError) {
     console.error("Failed to insert call log natively", dbError);
   }
@@ -81,19 +75,11 @@ export const triggerPatientCall = asyncHandler(async (req, res) => {
  */
 export const getAllCalls = asyncHandler(async (req, res) => {
   try {
-    if (redis) {
-      const cachedCalls = await redis.get("calls:all");
-      if (cachedCalls) {
-        return res
-          .status(200)
-          .json(
-            new ApiResponse(
-              200,
-              JSON.parse(cachedCalls),
-              "Call logs retrieved successfully from cache",
-            ),
-          );
-      }
+    const cachedCalls = await redis.get("calls:all");
+    if (cachedCalls) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, JSON.parse(cachedCalls), "Call logs retrieved successfully from cache"));
     }
 
     const calls = await prisma.callLog.findMany({
@@ -105,16 +91,12 @@ export const getAllCalls = asyncHandler(async (req, res) => {
       },
     });
 
-    if (redis) {
-      await redis.set("calls:all", JSON.stringify(calls), "EX", 300); // Cache for 5 minutes
-    }
+    await redis.set("calls:all", JSON.stringify(calls), "EX", 300); // Cache for 5 minutes
 
     return res
       .status(200)
       .json(new ApiResponse(200, calls, "Call logs retrieved successfully"));
   } catch (error) {
-    throw new ApiError(500, "Error fetching calls from database", [
-      error.message,
-    ]);
+    throw new ApiError(500, "Error fetching calls from database", [error.message]);
   }
 });
