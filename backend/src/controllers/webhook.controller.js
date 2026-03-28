@@ -58,11 +58,9 @@ export const handleUltravoxWebhook = asyncHandler(async (req, res) => {
         completed_at: new Date(),
       },
     });
-
+    
     // Invalidate the calls cache
-    if (redis) {
-      await redis.del("calls:all");
-    }
+    await redis.del("calls:all");
   } catch (dbError) {
     console.error("Prisma DB Error:", dbError);
     throw new ApiError(500, "Failed to log call data into Database", [
@@ -126,7 +124,7 @@ export const handleTwilioTwiML = asyncHandler(async (req, res) => {
       patient.name,
       patient.primary_diagnosis,
       patient_id,
-      CallSid,
+      CallSid
     );
 
     // Output connection Stream to Twilio format
@@ -159,11 +157,9 @@ export const handleTwilioStatus = asyncHandler(async (req, res) => {
       where: { call_id: CallSid },
       data: { status: CallStatus },
     });
-
+    
     // Invalidate the calls cache
-    if (redis) {
-      await redis.del("calls:all");
-    }
+    await redis.del("calls:all");
   } catch (error) {
     console.error("Failed to update call status:", error.message);
   }
