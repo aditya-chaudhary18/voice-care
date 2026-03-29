@@ -4,7 +4,8 @@ import { fetchWithAuth } from '../../lib/api';
 export interface Appointment {
   id: string;
   patient_id: string;
-  proposed_time: string;
+  proposed_date: string;
+  proposed_session: string;
   status: string;
   created_at: string;
   patient: {

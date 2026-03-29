@@ -74,7 +74,11 @@ export default function Schedule() {
                 <div>
                   <p className="font-semibold text-primary">{appt.patient?.name}</p>
                   <p className="text-sm text-muted-foreground">Diagnosis: {appt.patient?.primary_diagnosis}</p>
-                  <p className="text-sm text-primary mt-1">Requested Time: {new Date(appt.proposed_time).toLocaleString()}</p>
+                  {appt.proposed_date ? (
+                    <p className="text-sm text-primary mt-1">Requested Session: {appt.proposed_date} ({appt.proposed_session})</p>
+                  ) : (
+                    <p className="text-sm text-primary mt-1">Requested Session: {appt.proposed_session}</p>
+                  )}
                 </div>
                 <button
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
