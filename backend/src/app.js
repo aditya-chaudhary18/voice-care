@@ -28,6 +28,8 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use("/api/health", healthRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/vaccinations", vaccinationRoutes);
+app.use("/api/calls", callRoutes);
+app.use("/api/webhooks", webhookRoutes);
 
 app.get("/api", (req, res) => {
   res.json({
@@ -39,6 +41,7 @@ app.get("/api", (req, res) => {
 
 // 404 Route handler
 app.use((req, res, next) => {
+  console.warn(`[404] Endpoint not found: ${req.method} ${req.url}`);
   res.status(404).json({
     success: false,
     message: "Endpoint not found",

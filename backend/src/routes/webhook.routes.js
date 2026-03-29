@@ -9,8 +9,10 @@ const router = express.Router();
 
 router.post("/ultravox", handleUltravoxWebhook);
 
-// Twilio Routes
+// Twilio Routes - Support both POST and GET
 router.post("/twilio/twiml", handleTwilioTwiML);
+router.get("/twilio/twiml", handleTwilioTwiML);
 router.post("/twilio/status", handleTwilioStatus);
+router.get("/twilio/status", handleTwilioStatus);
 
 export default router;
