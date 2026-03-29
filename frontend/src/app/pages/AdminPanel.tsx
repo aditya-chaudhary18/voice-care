@@ -1,16 +1,36 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
-import { Users, UserPlus, Settings, Phone, BarChart3, LogOut } from 'lucide-react';
-import { mockDoctors } from '../data/mockData';
-import { usePatients } from '../data/usePatients';
-import { AddPatientModal } from '../components/AddPatientModal';
+import { useState } from "react";
+import { Link } from "react-router";
+import {
+  Users,
+  UserPlus,
+  Settings,
+  Phone,
+  BarChart3,
+  LogOut,
+  Mail,
+} from "lucide-react";
+import { mockDoctors } from "../data/mockData";
+import { usePatients } from "../data/usePatients";
+import { AddPatientModal } from "../components/AddPatientModal";
+import { AddDoctorModal } from "../components/AddDoctorModal";
 
-type AdminView = 'patients' | 'doctors' | 'stats';
+type AdminView = "patients" | "doctors" | "stats";
 
 export default function AdminPanel() {
   const { patients: mockPatients, refetch: refetchPatients } = usePatients();
-  const [activeView, setActiveView] = useState<AdminView>('patients');
+  const [activeView, setActiveView] = useState<AdminView>("patients");
   const [showAddPatientModal, setShowAddPatientModal] = useState(false);
+  const [showAddDoctorModal, setShowAddDoctorModal] = useState(false);
+
+  // Create a local state for mock doctors so we can visually "add" them in the UI
+  // Note: in a real app, you'd use a hook like useDoctors()
+  const [doctorsList, setDoctorsList] = useState(mockDoctors);
+
+  const handleAddDoctorSuccess = (newDoctor: any) => {
+    // Update local state to immediately show the added doctor
+    setDoctorsList([...doctorsList, newDoctor]);
+    setShowAddDoctorModal(false);
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -28,33 +48,33 @@ export default function AdminPanel() {
 
         <nav className="flex-1 p-4 space-y-2">
           <button
-            onClick={() => setActiveView('patients')}
+            onClick={() => setActiveView("patients")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeView === 'patients'
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50'
+              activeView === "patients"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50"
             }`}
           >
             <Users className="w-5 h-5" />
             <span>Patient Management</span>
           </button>
           <button
-            onClick={() => setActiveView('doctors')}
+            onClick={() => setActiveView("doctors")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeView === 'doctors'
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50'
+              activeView === "doctors"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50"
             }`}
           >
             <UserPlus className="w-5 h-5" />
             <span>Doctor Management</span>
           </button>
           <button
-            onClick={() => setActiveView('stats')}
+            onClick={() => setActiveView("stats")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              activeView === 'stats'
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/50'
+              activeView === "stats"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50"
             }`}
           >
             <BarChart3 className="w-5 h-5" />
@@ -69,7 +89,9 @@ export default function AdminPanel() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm truncate">Admin User</p>
-              <p className="text-xs text-sidebar-foreground/70">Administrator</p>
+              <p className="text-xs text-sidebar-foreground/70">
+                Administrator
+              </p>
             </div>
           </div>
           <Link
@@ -85,14 +107,18 @@ export default function AdminPanel() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto bg-background">
         {/* Patient Management View */}
-        {activeView === 'patients' && (
+        {activeView === "patients" && (
           <div className="p-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl mb-2 text-primary">Patient Management</h1>
-                <p className="text-muted-foreground">Add, edit, and manage discharged patients</p>
+                <h1 className="text-3xl mb-2 text-primary">
+                  Patient Management
+                </h1>
+                <p className="text-muted-foreground">
+                  Add, edit, and manage discharged patients
+                </p>
               </div>
-              <button 
+              <button
                 onClick={() => setShowAddPatientModal(true)}
                 className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
               >
@@ -102,7 +128,7 @@ export default function AdminPanel() {
             </div>
 
             {/* Add Patient Modal */}
-            <AddPatientModal 
+            <AddPatientModal
               isOpen={showAddPatientModal}
               onClose={() => setShowAddPatientModal(false)}
               onSuccess={refetchPatients}
@@ -113,35 +139,64 @@ export default function AdminPanel() {
               <table className="w-full">
                 <thead className="bg-secondary">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Patient ID</th>
-                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Name</th>
-                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Diagnosis</th>
-                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Assigned Doctor</th>
-                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Discharge Date</th>
-                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">Actions</th>
+                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                      Patient ID
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                      Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                      Diagnosis
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                      Assigned Doctor
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                      Discharge Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm text-secondary-foreground">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {mockPatients.map((patient) => (
-                    <tr key={patient.id} className="hover:bg-secondary/30 transition-colors">
-                      <td className="px-6 py-4 text-sm text-muted-foreground">{patient.id}</td>
+                    <tr
+                      key={patient.id}
+                      className="hover:bg-secondary/30 transition-colors"
+                    >
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {patient.id}
+                      </td>
                       <td className="px-6 py-4">
                         <div>
                           <div className="text-primary">{patient.name}</div>
-                          <div className="text-xs text-muted-foreground">{patient.phone}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {patient.phone}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm">{patient.diagnosis}</td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {mockDoctors.find(d => d.id === patient.assignedDoctorId)?.name}
+                        {
+                          mockDoctors.find(
+                            (d) => d.id === patient.assignedDoctorId,
+                          )?.name
+                        }
                       </td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {new Date(patient.dischargeDate).toLocaleDateString('en-IN')}
+                        {new Date(patient.dischargeDate).toLocaleDateString(
+                          "en-IN",
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button className="text-primary hover:underline text-sm">Edit</button>
-                          <button className="text-red-600 hover:underline text-sm">Delete</button>
+                          <button className="text-primary hover:underline text-sm">
+                            Edit
+                          </button>
+                          <button className="text-red-600 hover:underline text-sm">
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -153,33 +208,64 @@ export default function AdminPanel() {
         )}
 
         {/* Doctor Management View */}
-        {activeView === 'doctors' && (
+        {activeView === "doctors" && (
           <div className="p-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl mb-2 text-primary">Doctor Management</h1>
-                <p className="text-muted-foreground">Manage doctors and their specialties</p>
+                <h1 className="text-3xl mb-2 text-primary">
+                  Doctor Management
+                </h1>
+                <p className="text-muted-foreground">
+                  Manage doctors and their specialties
+                </p>
               </div>
-              <button className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2">
+              <button
+                onClick={() => setShowAddDoctorModal(true)}
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+              >
                 <UserPlus className="w-5 h-5" />
                 Add New Doctor
               </button>
             </div>
 
+            {/* Add Doctor Modal */}
+            <AddDoctorModal
+              isOpen={showAddDoctorModal}
+              onClose={() => setShowAddDoctorModal(false)}
+              onSuccess={handleAddDoctorSuccess}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockDoctors.map((doctor) => (
-                <div key={doctor.id} className="bg-card p-6 rounded-xl shadow-md border border-border">
+              {doctorsList.map((doctor) => (
+                <div
+                  key={doctor.id}
+                  className="bg-card p-6 rounded-xl shadow-md border border-border"
+                >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-start gap-4">
-                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl text-primary">
-                        {doctor.name.split(' ').map(n => n[0]).join('')}
+                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl text-primary font-medium tracking-wider">
+                        {doctor.name
+                          .replace(/^(Dr\.|Dr\s+)/i, "")
+                          .trim()
+                          .split(" ")
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="text-lg text-primary mb-1">{doctor.name}</h3>
-                        <p className="text-sm text-muted-foreground">{doctor.specialty}</p>
+                        <h3 className="text-lg text-primary mb-1">
+                          {doctor.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {doctor.specialty}
+                        </p>
                       </div>
                     </div>
-                    <button className="text-primary hover:underline text-sm">Edit</button>
+                    <button className="text-primary hover:underline text-sm">
+                      Edit
+                    </button>
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -193,7 +279,12 @@ export default function AdminPanel() {
                   </div>
                   <div className="mt-4 pt-4 border-t border-border">
                     <p className="text-sm text-muted-foreground">
-                      Assigned Patients: {mockPatients.filter(p => p.assignedDoctorId === doctor.id).length}
+                      Assigned Patients:{" "}
+                      {
+                        mockPatients.filter(
+                          (p) => p.assignedDoctorId === doctor.id,
+                        ).length
+                      }
                     </p>
                   </div>
                 </div>
@@ -203,11 +294,15 @@ export default function AdminPanel() {
         )}
 
         {/* Statistics View */}
-        {activeView === 'stats' && (
+        {activeView === "stats" && (
           <div className="p-8">
             <div className="mb-8">
-              <h1 className="text-3xl mb-2 text-primary">Platform Statistics</h1>
-              <p className="text-muted-foreground">Overall system performance and metrics</p>
+              <h1 className="text-3xl mb-2 text-primary">
+                Platform Statistics
+              </h1>
+              <p className="text-muted-foreground">
+                Overall system performance and metrics
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -217,8 +312,12 @@ export default function AdminPanel() {
                     <Users className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <div className="text-2xl text-primary">{mockPatients.length}</div>
-                    <p className="text-sm text-muted-foreground">Total Patients</p>
+                    <div className="text-2xl text-primary">
+                      {mockPatients.length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Total Patients
+                    </p>
                   </div>
                 </div>
               </div>
@@ -229,8 +328,12 @@ export default function AdminPanel() {
                     <UserPlus className="w-6 h-6 text-accent-foreground" />
                   </div>
                   <div>
-                    <div className="text-2xl text-primary">{mockDoctors.length}</div>
-                    <p className="text-sm text-muted-foreground">Active Doctors</p>
+                    <div className="text-2xl text-primary">
+                      {doctorsList.length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Active Doctors
+                    </p>
                   </div>
                 </div>
               </div>
@@ -242,27 +345,44 @@ export default function AdminPanel() {
                   </div>
                   <div>
                     <div className="text-2xl text-green-600">156</div>
-                    <p className="text-sm text-muted-foreground">Total Calls (7 days)</p>
+                    <p className="text-sm text-muted-foreground">
+                      Total Calls (7 days)
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="bg-card p-6 rounded-xl shadow-md border border-border">
-              <h2 className="text-xl mb-6 text-primary">Language Distribution</h2>
+              <h2 className="text-xl mb-6 text-primary">
+                Language Distribution
+              </h2>
               <div className="space-y-3">
-                {['Hindi', 'English', 'Telugu', 'Gujarati', 'Kannada', 'Urdu'].map((lang, idx) => {
-                  const count = mockPatients.filter(p => p.language === lang).length;
+                {[
+                  "Hindi",
+                  "English",
+                  "Telugu",
+                  "Gujarati",
+                  "Kannada",
+                  "Urdu",
+                ].map((lang, idx) => {
+                  const count = mockPatients.filter(
+                    (p) => p.language === lang,
+                  ).length;
                   const percentage = (count / mockPatients.length) * 100;
                   return (
                     <div key={lang}>
                       <div className="flex justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">{lang}</span>
-                        <span className="text-sm text-primary">{count} patients</span>
+                        <span className="text-sm text-muted-foreground">
+                          {lang}
+                        </span>
+                        <span className="text-sm text-primary">
+                          {count} patients
+                        </span>
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-accent transition-all" 
+                        <div
+                          className="h-full bg-accent transition-all"
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
@@ -279,4 +399,3 @@ export default function AdminPanel() {
 }
 
 // Missing import
-import { Mail } from 'lucide-react';
